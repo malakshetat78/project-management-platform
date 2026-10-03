@@ -1,0 +1,6 @@
+import {env} from 'cloudflare:workers';
+import {getChatGPTUser,chatGPTSignInPath} from '@/app/chatgpt-auth';
+import {one} from '@/lib/server';
+import Workspace from '@/components/workspace';
+export const dynamic='force-dynamic';
+export default async function Page(){const owner=await getChatGPTUser();if(!owner)return <main className="password-gate"><h1>Activate your workspace</h1><p>Continue with the ChatGPT account that owns this workspace to create Malak and Shahy’s administrator accounts.</p><a href={chatGPTSignInPath('/setup')} target="_top" className="btn export-link">Continue with ChatGPT</a></main>;if(!(env as any).BOOTSTRAP_OWNER_EMAIL||owner.email.toLowerCase()!==String((env as any).BOOTSTRAP_OWNER_EMAIL).toLowerCase())return <main className="denied"><h1>Access Denied</h1><p>Only the workspace owner can activate the initial administrator accounts.</p><a href="/">Return to login</a></main>;const settings=await one('SELECT bootstrapped FROM project_settings WHERE id=?','project');if(settings?.bootstrapped)return <main className="denied"><h1>Workspace activated</h1><p>Malak and Shahy can log in using their individual accounts.</p><a href="/">Open login</a></main>;return <Workspace initialSetup/>;}

@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `documents_family_version` ON `documents` (`family_id`,`version`);
