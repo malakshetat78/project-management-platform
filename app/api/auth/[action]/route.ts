@@ -6,6 +6,17 @@ export const dynamic='force-dynamic';
 const password=z.string().min(12,'Use at least 12 characters').max(128);
 export async function GET(req:Request){return safe(async()=>json({user:await currentUser(req)}));}
 export async function POST(req:Request,{params}:any){return safe(async()=>{origin(req);const {action}=await params;const body=await req.json();
+if(action==='signup'){
+ const b=z.object({name:str(200),email:z.string().trim().email().max(254),password,confirmPassword:password}).strict().parse(body);
+ if(b.password!==b.confirmPassword)fail(400,'Passwords do not match');
+ if(!(await one('SELECT bootstrapped FROM project_settings WHERE id=?','project'))?.bootstrapped)fail(409,'The administrators must activate the workspace first');
+ const email=b.email.toLowerCase();if(await one('SELECT id FROM users WHERE lower(email)=?',email))fail(409,'An account already exists for this email');
+ const rateId=await digest('signup:'+ (req.headers.get('cf-connecting-ip')||'local'));const rate=await one('SELECT * FROM login_attempts WHERE id=?',rateId);if(rate&&rate.until>now()&&rate.count>=8)fail(429,'Too many sign-up attempts. Try again in 15 minutes.');
+ await stmt('INSERT INTO login_attempts (id,count,until) VALUES (?,1,?) ON CONFLICT(id) DO UPDATE SET count=CASE WHEN until<? THEN 1 ELSE count+1 END,until=excluded.until',rateId,new Date(Date.now()+900000).toISOString(),now()).run();
+ const id=uid(),username='member-'+id.slice(0,18),hash=await passwordHash(b.password);const u={id,name:b.name};
+ try{await db().batch([stmt("INSERT INTO users (id,name,username,email,password_hash,role,active,must_change,created_at) VALUES (?,?,?,?,?,'MEMBER',1,0,?)",id,b.name,username,email,hash,now()),audit(u,'Signed up','users',id,b.name)]);}catch(e){if(await one('SELECT id FROM users WHERE lower(email)=?',email))fail(409,'An account already exists for this email');throw e;}
+ return json({ok:true},201);
+}
 if(action==='login'){
  const b=z.object({login:str(254),password:z.string().min(1).max(128),remember:z.boolean().optional()}).parse(body);const login=b.login.toLowerCase();
  const rateId=await digest(`${req.headers.get('cf-connecting-ip')||'local'}:${login}`);const limit=await one('SELECT * FROM login_attempts WHERE id=?',rateId);if(limit&&limit.until>now()&&limit.count>=8)fail(429,'Too many attempts. Try again in 15 minutes.');

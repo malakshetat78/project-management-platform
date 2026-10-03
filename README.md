@@ -5,7 +5,7 @@ A team workspace that preserves the graduation project journey: plans, assignmen
 ## Features
 
 - Individual password-based accounts, secure server-side sessions, logout and temporary-password replacement.
-- Backend RBAC: Admins manage project work and accounts; Members update only their own assigned tasks.
+- Backend RBAC: Admins manage project work and accounts; Members create tasks and update tasks they created or are assigned to.
 - Task assignment, dates, duration, priority, progress, blockers, results, comments and permanent task history.
 - Weekly plans, immutable review snapshots, work updates and audited carry-forward between weeks.
 - Monthly goals, milestones, an editable roadmap, a database-driven timeline and project stages.
@@ -18,7 +18,7 @@ A team workspace that preserves the graduation project journey: plans, assignmen
 
 **Malak — Admin** and **Shahy — Admin** are the two initial administrators. Both accounts are protected against disabling and demotion. No passwords are included in this repository. First-time activation sets their emails and separate passwords.
 
-Members can view team project records, update their own assigned tasks, add weekly updates and comments, and upload work evidence. Administrative operations are checked on the server on every request.
+Members can view shared team project records, create tasks and update their own tasks, add weekly updates and comments, and upload work evidence. Administrative operations are checked on the server on every request.
 
 ## Tech stack
 
@@ -66,7 +66,7 @@ The local database and bucket are Cloudflare emulations. Production uses separat
 
 Configure `BOOTSTRAP_OWNER_EMAIL` with the Site owner's ChatGPT account email. Open `/setup` once with that ChatGPT account and enter both administrators' emails and new passwords. The setup page verifies the owner on the server. Activation is one-time. A secret bootstrap token is also supported for controlled server setup and the isolated integration suite; never share or commit it. The two accounts can then log in using their emails or usernames `malak` and `shahy`. Share each person's password privately with that person.
 
-There is no public signup. Admins add team accounts with temporary passwords or reset existing passwords. Email invitations and self-service forgotten-password emails are not configured; password recovery is admin-assisted. Members may change their display profile and password.
+Team members can sign up with their full name, email, password and confirmation. All signups are Members; only the two protected accounts, Malak and Shahy, are Admins. Admins add team accounts with temporary passwords or reset existing passwords. Email invitations and self-service forgotten-password emails are not configured; password recovery is admin-assisted. Members may change their display profile and password.
 
 ## Files and storage
 
@@ -90,11 +90,7 @@ Keep `.env`, `.dev.vars`, passwords, tokens, database contents, bucket contents 
 
 ## GitHub repository
 
-Source repository: [malakshetat78/project-management-platform](https://github.com/malakshetat78/project-management-platform) (public).
-
-Live workspace: https://icvsp-project-workspace.khaledshetat4.chatgpt.site
-
-The Site source is versioned independently in the Sites-managed repository.
+Source repository: https://github.com/malakshetat78/project-management-platform (public). The Site source is versioned in the Sites-managed source repository independently of GitHub.
 
 ## Scope and operating notes
 
